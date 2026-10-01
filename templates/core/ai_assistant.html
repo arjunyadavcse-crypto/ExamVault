@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+
+{% block title %}AI Study Lab - ExamVault Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-warning bg-opacity-25 text-warning p-3 rounded-circle">
+                <i data-lucide="sparkles" style="width: 36px; height: 36px;"></i>
+            </div>
+            <div>
+                <h2 class="text-white mb-1">Flask AI Microservice Assistant</h2>
+                <p class="text-muted small mb-0">Interactive student lab powered by Flask API for dynamic question generation & instant solution breakdowns</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Interactive AI Generator Tool -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="text-white mb-3 fs-5"><i data-lucide="cpu" class="me-2 text-warning"></i> Generate Practice Questions</h4>
+                <p class="text-muted small mb-4">Select a subject domain to prompt the Flask microservice engine for custom practice MCQs.</p>
+
+                <form method="POST" action="{% url 'ai_assistant' %}" class="mb-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="generate_questions">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Select Subject Domain</label>
+                        <select name="subject_name" class="form-select">
+                            {% for s in subjects %}
+                                <option value="{{ s.name }}">{{ s.name }}</option>
+                            {% empty %}
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Data Structures">Data Structures</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent-custom w-100">
+                        <i data-lucide="zap" class="me-1"></i> Generate AI Questions Now
+                    </button>
+                </form>
+
+                {% if ai_questions %}
+                    <h6 class="text-white mb-3 font-weight-bold">Generated AI Question Output:</h6>
+                    <div class="d-flex flex-column gap-3">
+                        {% for q in ai_questions %}
+                            <div class="p-3 glass-card-static rounded-3 border-warning border-opacity-50">
+                                <div class="badge bg-warning bg-opacity-25 text-warning mb-2">Q{{ forloop.counter }}</div>
+                                <h6 class="text-white mb-2 fs-6">{{ q.question_text }}</h6>
+                                <ul class="list-unstyled text-muted small mb-2">
+                                    <li><strong>A:</strong> {{ q.option_a }}</li>
+                                    <li><strong>B:</strong> {{ q.option_b }}</li>
+                                    <li><strong>C:</strong> {{ q.option_c }}</li>
+                                    <li><strong>D:</strong> {{ q.option_d }}</li>
+                                </ul>
+                                <div class="badge bg-success bg-opacity-25 text-success">Correct Option: {{ q.correct_option }}</div>
+                                <p class="text-muted small mt-2 mb-0"><em>Explanation:</em> {{ q.explanation }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Interactive Solution Analyzer Tool -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="text-white mb-3 fs-5"><i data-lucide="help-circle" class="me-2 text-info"></i> Instant AI Solution Analyzer</h4>
+                <p class="text-muted small mb-4">Paste any question and options to get step-by-step AI explanation from Flask microservice.</p>
+
+                <form method="POST" action="{% url 'ai_assistant' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="explain_solution">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Question Statement</label>
+                        <textarea name="question_text" class="form-control" rows="3" placeholder="e.g. What is the time complexity of binary search?" required></textarea>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small">Correct Option</label>
+                            <select name="correct_option" class="form-select">
+                                <option value="A">Option A</option>
+                                <option value="B">Option B</option>
+                                <option value="C">Option C</option>
+                                <option value="D">Option D</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small">Your Selected Option</label>
+                            <select name="student_option" class="form-select">
+                                <option value="A">Option A</option>
+                                <option value="B">Option B</option>
+                                <option value="C">Option C</option>
+                                <option value="D">Option D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 mb-3">
+                        <i data-lucide="sparkles" class="me-1"></i> Analyze Solution via Flask API
+                    </button>
+                </form>
+
+                {% if explanation_result %}
+                    <div class="p-3 glass-card-static rounded-3 border-info">
+                        <h6 class="text-info mb-2"><i data-lucide="check-circle" class="me-1"></i> AI Explanation Analysis:</h6>
+                        <p class="text-light mb-0 fs-6">{{ explanation_result }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

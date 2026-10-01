@@ -1,0 +1,81 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ subject.name }} - ExamVault Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Subject Banner -->
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary bg-opacity-25 p-3 rounded-3 text-primary">
+                <i data-lucide="{{ subject.icon|default:'book-open' }}" style="width: 48px; height: 48px;"></i>
+            </div>
+            <div>
+                <span class="badge bg-secondary mb-1">{{ subject.code }}</span>
+                <h2 class="text-white mb-1">{{ subject.name }}</h2>
+                <p class="text-muted small mb-0">{{ subject.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- PYQ Files Section -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="text-white mb-3 fs-5"><i data-lucide="file-text" class="me-2 text-primary"></i> Previous Year Question Papers (PYQs)</h4>
+                
+                <div class="d-flex flex-column gap-3">
+                    {% for pyq in pyqs %}
+                        <div class="p-3 glass-card-static rounded-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-white mb-1 fw-bold">{{ pyq.title }}</h6>
+                                <span class="badge bg-secondary text-light me-1">{{ pyq.year }}</span>
+                                {% if pyq.is_premium %}
+                                    <span class="badge badge-premium me-1">PRO PDF</span>
+                                {% else %}
+                                    <span class="badge badge-free me-1">FREE PDF</span>
+                                {% endif %}
+                                <span class="small text-muted"><i data-lucide="download" class="me-1"></i> {{ pyq.download_count }} downloads</span>
+                            </div>
+                            <a href="{% url 'download_pyq' pyq.id %}" class="btn btn-primary-custom btn-sm">
+                                Download <i data-lucide="download" class="ms-1"></i>
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted py-4 text-center">No PYQs uploaded for this subject yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Online Tests Section -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="text-white mb-3 fs-5"><i data-lucide="award" class="me-2 text-info"></i> Online Mock Test Series</h4>
+                
+                <div class="d-flex flex-column gap-3">
+                    {% for test in tests %}
+                        <div class="p-3 glass-card-static rounded-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="text-white mb-0 fw-bold">{{ test.title }}</h6>
+                                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-2 py-1 small">
+                                    {{ test.difficulty }}
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-2">{{ test.description|truncatewords:15 }}</p>
+                            <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top border-secondary border-opacity-25">
+                                <span><i data-lucide="clock" class="me-1"></i> {{ test.duration_minutes }} mins | {{ test.total_marks }} marks</span>
+                                <a href="{% url 'test_detail' test.id %}" class="btn btn-secondary-custom btn-sm">
+                                    Attempt Test <i data-lucide="play" class="ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted py-4 text-center">No online tests available for this subject yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

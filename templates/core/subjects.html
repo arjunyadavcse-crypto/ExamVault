@@ -1,0 +1,55 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Subjects Directory - ExamVault Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="text-white mb-1"><i data-lucide="book-open" class="me-2 text-primary"></i> Academic Subjects Directory</h2>
+            <p class="text-muted small mb-0">Browse Previous Year Question Papers & Mock Test Series by Subject</p>
+        </div>
+        <form method="GET" action="{% url 'subjects' %}" class="d-flex gap-2">
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search subjects..." style="width: 250px;">
+            <button type="submit" class="btn btn-primary-custom btn-sm">Search</button>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for sub in subjects %}
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="bg-primary bg-opacity-25 p-3 rounded-3 text-primary">
+                                <i data-lucide="{{ sub.icon|default:'book-open' }}" style="width: 32px; height: 32px;"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0 fs-5">{{ sub.name }}</h4>
+                                <span class="badge bg-secondary text-light">{{ sub.code }}</span>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-3">{{ sub.description|default:"Comprehensive academic curriculum covering theory, numericals and previous year solved questions."|truncatewords:20 }}</p>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between text-muted small py-2 mb-3 border-top border-bottom border-secondary border-opacity-25">
+                            <span><i data-lucide="file-text" class="me-1"></i> {{ sub.pyq_count }} PYQ Papers</span>
+                            <span><i data-lucide="award" class="me-1"></i> {{ sub.test_count }} Online Tests</span>
+                        </div>
+                        <a href="{% url 'subject_detail' sub.id %}" class="btn btn-secondary-custom btn-sm w-100">
+                            View Subject Content <i data-lucide="chevron-right" class="ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center text-muted py-5">
+                <i data-lucide="search-x" class="mb-2 text-secondary" style="width: 48px; height: 48px;"></i>
+                <h5>No subjects found matching "{{ query }}"</h5>
+                <a href="{% url 'subjects' %}" class="btn btn-secondary-custom btn-sm mt-2">Clear Search</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

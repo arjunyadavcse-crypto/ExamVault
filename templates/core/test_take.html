@@ -1,0 +1,213 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Attempting: {{ test.title }} | ExamVault{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+    <!-- Test Header -->
+    <div class="glass-card p-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <h4 class="text-white mb-0 fs-5"><i data-lucide="edit-3" class="me-2 text-primary"></i> {{ test.title }}</h4>
+            <span class="text-muted small">Subject: {{ test.subject.name }} | Total Questions: {{ total_questions }}</span>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="timer-badge">
+                <i data-lucide="clock" class="text-danger"></i>
+                <span id="timerDisplay">00:00</span>
+            </div>
+            <button type="button" onclick="submitExamForm()" class="btn btn-primary-custom btn-sm">
+                Submit Exam <i data-lucide="send" class="ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <form id="examForm" method="POST" action="{% url 'submit_test' test.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="time_taken" id="timeTakenInput" value="0">
+
+        <div class="row g-3">
+            <!-- Left Side: Active Question Display -->
+            <div class="col-lg-8">
+                {% for q in questions %}
+                    <div class="question-container glass-card p-4 mb-3" id="question_card_{{ forloop.counter }}" style="{% if not forloop.first %}display: none;{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-1 rounded-pill fw-bold">
+                                Question {{ forloop.counter }} of {{ total_questions }}
+                            </span>
+                            <span class="text-muted small"><i data-lucide="award" class="me-1"></i> {{ q.marks }} Marks</span>
+                        </div>
+
+                        <h5 class="text-white mb-4 lh-base fs-5">{{ q.question_text }}</h5>
+
+                        <div class="mcq-options-group">
+                            <label class="mcq-option-card w-100" id="opt_label_{{ q.id }}_A" onclick="selectOption({{ q.id }}, 'A', {{ forloop.counter }})">
+                                <input type="radio" name="question_{{ q.id }}" value="A" class="d-none" id="opt_input_{{ q.id }}_A">
+                                <span class="option-badge">A</span>
+                                <span class="text-light fs-6">{{ q.option_a }}</span>
+                            </label>
+
+                            <label class="mcq-option-card w-100" id="opt_label_{{ q.id }}_B" onclick="selectOption({{ q.id }}, 'B', {{ forloop.counter }})">
+                                <input type="radio" name="question_{{ q.id }}" value="B" class="d-none" id="opt_input_{{ q.id }}_B">
+                                <span class="option-badge">B</span>
+                                <span class="text-light fs-6">{{ q.option_b }}</span>
+                            </label>
+
+                            <label class="mcq-option-card w-100" id="opt_label_{{ q.id }}_C" onclick="selectOption({{ q.id }}, 'C', {{ forloop.counter }})">
+                                <input type="radio" name="question_{{ q.id }}" value="C" class="d-none" id="opt_input_{{ q.id }}_C">
+                                <span class="option-badge">C</span>
+                                <span class="text-light fs-6">{{ q.option_c }}</span>
+                            </label>
+
+                            <label class="mcq-option-card w-100" id="opt_label_{{ q.id }}_D" onclick="selectOption({{ q.id }}, 'D', {{ forloop.counter }})">
+                                <input type="radio" name="question_{{ q.id }}" value="D" class="d-none" id="opt_input_{{ q.id }}_D">
+                                <span class="option-badge">D</span>
+                                <span class="text-light fs-6">{{ q.option_d }}</span>
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <button type="button" class="btn btn-secondary-custom btn-sm" onclick="clearChoice({{ q.id }}, {{ forloop.counter }})">
+                                Clear Choice
+                            </button>
+
+                            <div class="d-flex gap-2">
+                                {% if not forloop.first %}
+                                    <button type="button" class="btn btn-secondary-custom btn-sm" onclick="showQuestion({{ forloop.counter|add:"-1" }})">
+                                        <i data-lucide="chevron-left" class="me-1"></i> Previous
+                                    </button>
+                                {% endif %}
+                                {% if not forloop.last %}
+                                    <button type="button" class="btn btn-primary-custom btn-sm" onclick="showQuestion({{ forloop.counter|add:"1" }})">
+                                        Next <i data-lucide="chevron-right" class="ms-1"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-success btn-sm" onclick="submitExamForm()">
+                                        Finish & Submit Exam <i data-lucide="check-circle" class="ms-1"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Right Side: Question Navigator Palette -->
+            <div class="col-lg-4">
+                <div class="glass-card p-4 sticky-top" style="top: 90px;">
+                    <h5 class="text-white mb-3 fs-6 brand-font"><i data-lucide="grid" class="me-2 text-primary"></i> Question Navigator</h5>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for q in questions %}
+                            <button type="button" 
+                                    id="palette_btn_{{ forloop.counter }}" 
+                                    class="question-palette-btn {% if forloop.first %}active{% endif %}"
+                                    onclick="showQuestion({{ forloop.counter }})">
+                                {{ forloop.counter }}
+                            </button>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex flex-column gap-2 text-muted small border-top border-secondary border-opacity-25 pt-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="question-palette-btn active" style="width: 24px; height: 24px; font-size: 10px;">1</div>
+                            <span>Currently Active Question</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="question-palette-btn answered" style="width: 24px; height: 24px; font-size: 10px;">1</div>
+                            <span>Answered Question</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="question-palette-btn" style="width: 24px; height: 24px; font-size: 10px;">1</div>
+                            <span>Unanswered Question</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let totalQuestions = {{ total_questions }};
+    let durationMinutes = {{ test.duration_minutes }};
+    let totalSeconds = durationMinutes * 60;
+    let secondsElapsed = 0;
+
+    let timerInterval = setInterval(updateTimer, 1000);
+
+    function updateTimer() {
+        secondsElapsed++;
+        let remainingSeconds = totalSeconds - secondsElapsed;
+
+        if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            alert("Time is up! Your exam is being submitted automatically.");
+            submitExamForm();
+            return;
+        }
+
+        let m = Math.floor(remainingSeconds / 60);
+        let s = remainingSeconds % 60;
+        document.getElementById('timerDisplay').innerText = 
+            (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+        document.getElementById('timeTakenInput').value = secondsElapsed;
+    }
+
+    function showQuestion(qNum) {
+        for (let i = 1; i <= totalQuestions; i++) {
+            document.getElementById('question_card_' + i).style.display = (i === qNum) ? 'block' : 'none';
+            let btn = document.getElementById('palette_btn_' + i);
+            if (i === qNum) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+    }
+
+    function selectOption(qId, optCode, qNum) {
+        // Clear selected class from options for this question
+        ['A', 'B', 'C', 'D'].forEach(code => {
+            let label = document.getElementById(`opt_label_${qId}_${code}`);
+            if (label) label.classList.remove('selected');
+        });
+
+        // Select current option
+        let selLabel = document.getElementById(`opt_label_${qId}_${optCode}`);
+        let selInput = document.getElementById(`opt_input_${qId}_${optCode}`);
+        if (selLabel && selInput) {
+            selLabel.classList.add('selected');
+            selInput.checked = true;
+        }
+
+        // Mark palette button as answered
+        let paletteBtn = document.getElementById('palette_btn_' + qNum);
+        if (paletteBtn) {
+            paletteBtn.classList.add('answered');
+        }
+    }
+
+    function clearChoice(qId, qNum) {
+        ['A', 'B', 'C', 'D'].forEach(code => {
+            let label = document.getElementById(`opt_label_${qId}_${code}`);
+            let input = document.getElementById(`opt_input_${qId}_${code}`);
+            if (label) label.classList.remove('selected');
+            if (input) input.checked = false;
+        });
+
+        let paletteBtn = document.getElementById('palette_btn_' + qNum);
+        if (paletteBtn) {
+            paletteBtn.classList.remove('answered');
+        }
+    }
+
+    function submitExamForm() {
+        if (confirm("Are you sure you want to submit your exam now?")) {
+            document.getElementById('examForm').submit();
+        }
+    }
+</script>
+{% endblock %}

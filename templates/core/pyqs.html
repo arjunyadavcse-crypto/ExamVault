@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+
+{% block title %}PYQ Repository - ExamVault Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="text-white mb-1"><i data-lucide="file-text" class="me-2 text-primary"></i> Previous Year Question Papers (PYQs)</h2>
+            <p class="text-muted small mb-0">Download verified examination question papers and solved solution PDFs</p>
+        </div>
+        <a href="{% url 'subscriptions' %}" class="btn btn-accent-custom btn-sm">
+            <i data-lucide="shield-check" class="me-1"></i> Unlock Pro PDF Downloads
+        </a>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="glass-card p-3 mb-4">
+        <form method="GET" action="{% url 'pyqs' %}" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by paper title or keyword...">
+            </div>
+            <div class="col-md-4">
+                <select name="subject" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Subjects</option>
+                    {% for s in subjects %}
+                        <option value="{{ s.id }}" {% if selected_subject == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }} ({{ s.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary-custom w-100">Filter Papers</button>
+                {% if query or selected_subject %}
+                    <a href="{% url 'pyqs' %}" class="btn btn-secondary-custom">Reset</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- PYQ List Grid -->
+    <div class="row g-4">
+        {% for pyq in pyqs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-2 py-1 rounded small">
+                                {{ pyq.subject.code }}
+                            </span>
+                            {% if pyq.is_premium %}
+                                <span class="badge badge-premium">PRO PDF</span>
+                            {% else %}
+                                <span class="badge badge-free">FREE</span>
+                            {% endif %}
+                        </div>
+                        <h4 class="text-white fs-5 mt-2 mb-1">{{ pyq.title }}</h4>
+                        <div class="text-muted small mb-3">
+                            <i data-lucide="calendar" class="me-1" style="width: 14px; height: 14px;"></i> Year: {{ pyq.year }} | {{ pyq.subject.name }}
+                        </div>
+                        <p class="text-muted small mb-3">{{ pyq.description|default:"Verified authentic examination paper with step-by-step solutions."|truncatewords:15 }}</p>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center text-muted small py-2 mb-3 border-top border-secondary border-opacity-25">
+                            <span><i data-lucide="download-cloud" class="me-1"></i> {{ pyq.download_count }} Downloads</span>
+                            <span><i data-lucide="file" class="me-1"></i> PDF Document</span>
+                        </div>
+                        <a href="{% url 'download_pyq' pyq.id %}" class="btn btn-primary-custom btn-sm w-100">
+                            Download PDF Resource <i data-lucide="download" class="ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center text-muted py-5">
+                <i data-lucide="folder-x" class="mb-2 text-secondary" style="width: 48px; height: 48px;"></i>
+                <h5>No PYQ papers match your filter criteria</h5>
+                <a href="{% url 'pyqs' %}" class="btn btn-secondary-custom btn-sm mt-2">View All Papers</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

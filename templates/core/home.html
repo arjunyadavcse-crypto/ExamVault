@@ -1,0 +1,210 @@
+{% extends 'core/base.html' %}
+
+{% block title %}ExamVault - Master Your Exams with PYQs & AI Tests{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row align-items-center my-5 py-4">
+        <div class="col-lg-7">
+            <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill mb-3">
+                <i data-lucide="sparkles" class="me-1"></i> AI-Powered Exam Preparation Platform
+            </span>
+            <h1 class="display-4 fw-extrabold text-white mb-3">
+                Ace Your Exams with <span class="text-gradient" style="background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Curated PYQs</span> & Online Mock Tests
+            </h1>
+            <p class="lead text-muted mb-4">
+                Access authentic university & competitive Previous Year Question papers, attempt timed online MCQ test series, and receive instant AI performance analytics to double your score.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{% url 'register' %}" class="btn btn-primary-custom btn-lg">
+                    <i data-lucide="rocket" class="me-2"></i> Start Preparing Free
+                </a>
+                <a href="{% url 'pyqs' %}" class="btn btn-secondary-custom btn-lg">
+                    <i data-lucide="download" class="me-2"></i> Browse PYQ PDFs
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5 mt-4 mt-lg-0">
+            <div class="glass-card p-4 text-center">
+                <div class="p-4 rounded-4 mb-3" style="background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(15,23,42,0.8) 100%);">
+                    <i data-lucide="file-check-2" style="width: 72px; height: 72px;" class="text-primary mb-2"></i>
+                    <h4 class="text-white">ExamVault Workflow</h4>
+                    <p class="small text-muted mb-0">Django Backend + SQLite + Flask AI Engine</p>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="p-3 glass-card-static rounded-3">
+                            <h3 class="text-primary mb-0 fw-bold">{{ stats.total_pyqs }}+</h3>
+                            <span class="small text-muted">Solved PYQs</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 glass-card-static rounded-3">
+                            <h3 class="text-info mb-0 fw-bold">{{ stats.total_tests }}+</h3>
+                            <span class="small text-muted">Online Tests</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Overview -->
+    <div class="row g-4 my-5">
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <div class="bg-primary bg-opacity-25 text-primary p-3 rounded-3 d-inline-block mb-3">
+                    <i data-lucide="book-marked" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h4 class="text-white">Verified PYQ Papers</h4>
+                <p class="text-muted small">
+                    High-quality downloadable PDFs with detailed question solutions categorized by subject and academic year.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <div class="bg-info bg-opacity-25 text-info p-3 rounded-3 d-inline-block mb-3">
+                    <i data-lucide="timer" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h4 class="text-white">Interactive Test Series</h4>
+                <p class="text-muted small">
+                    Timed MCQ exams with question navigation palette, instant auto-evaluation, and detailed answer keys.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100">
+                <div class="bg-warning bg-opacity-25 text-warning p-3 rounded-3 d-inline-block mb-3">
+                    <i data-lucide="cpu" style="width: 28px; height: 28px;"></i>
+                </div>
+                <h4 class="text-white">Flask AI Analytics</h4>
+                <p class="text-muted small">
+                    Microservice powered performance analysis identifying your weak topics and giving personalized study plans.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Subjects -->
+    <div class="my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-white mb-1">Featured Subjects</h2>
+                <p class="text-muted small mb-0">Explore previous year papers and mock series by domain</p>
+            </div>
+            <a href="{% url 'subjects' %}" class="btn btn-secondary-custom btn-sm">View All Subjects <i data-lucide="arrow-right" class="ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for sub in subjects %}
+                <div class="col-md-4 col-lg-3">
+                    <div class="glass-card p-3 h-100">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="bg-primary bg-opacity-25 p-3 rounded-3 text-primary">
+                                <i data-lucide="{{ sub.icon|default:'book-open' }}" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-white mb-0 fs-6">{{ sub.name }}</h5>
+                                <span class="badge bg-secondary bg-opacity-50 text-light small">{{ sub.code }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small mt-2 pt-2 border-top border-secondary border-opacity-25">
+                            <span><i data-lucide="file-text" class="me-1"></i> {{ sub.pyq_count }} PYQs</span>
+                            <span><i data-lucide="award" class="me-1"></i> {{ sub.test_count }} Tests</span>
+                        </div>
+                        <a href="{% url 'subject_detail' sub.id %}" class="btn btn-secondary-custom btn-sm w-100 mt-3">Explore Subject</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center text-muted py-4">No subjects added yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Active Mock Tests -->
+    <div class="my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="text-white mb-1">Active Test Series</h2>
+                <p class="text-muted small mb-0">Practice timed tests with instant feedback</p>
+            </div>
+            <a href="{% url 'tests' %}" class="btn btn-secondary-custom btn-sm">Browse All Tests <i data-lucide="arrow-right" class="ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for t in tests %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="glass-card p-4 h-100 d-flex flex-direction-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-info bg-opacity-25 text-info border border-info px-2 py-1 rounded">
+                                    {{ t.subject.name }}
+                                </span>
+                                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-2 py-1 rounded">
+                                    {{ t.difficulty }}
+                                </span>
+                            </div>
+                            <h4 class="text-white fs-5 mt-2 mb-2">{{ t.title }}</h4>
+                            <p class="text-muted small mb-3">{{ t.description|truncatewords:15 }}</p>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between text-muted small py-2 mb-3 border-top border-bottom border-secondary border-opacity-25">
+                                <span><i data-lucide="clock" class="me-1"></i> {{ t.duration_minutes }} Mins</span>
+                                <span><i data-lucide="help-circle" class="me-1"></i> {{ t.question_count }} Questions</span>
+                                <span><i data-lucide="award" class="me-1"></i> {{ t.total_marks }} Marks</span>
+                            </div>
+                            <a href="{% url 'test_detail' t.id %}" class="btn btn-primary-custom btn-sm w-100">
+                                Start Test Attempt <i data-lucide="play" class="ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Subscription Plans -->
+    <div class="my-5 py-4">
+        <div class="text-center mb-5">
+            <h2 class="text-white display-6">Simple, Transparent Pricing</h2>
+            <p class="text-muted">Choose a plan that fits your study needs</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for plan in plans %}
+                <div class="col-md-4">
+                    <div class="glass-card p-4 h-100 position-relative {% if plan.is_popular %}border-primary{% endif %}">
+                        {% if plan.is_popular %}
+                            <span class="position-absolute top-0 start-50 translate-middle badge bg-primary px-3 py-2 rounded-pill">
+                                Most Popular
+                            </span>
+                        {% endif %}
+                        <div class="text-center mb-4">
+                            <h4 class="text-white mb-2">{{ plan.name }}</h4>
+                            <h2 class="text-primary fw-bold display-5 mb-0">₹{{ plan.price }}</h2>
+                            <span class="text-muted small">for {{ plan.duration_days }} Days Access</span>
+                        </div>
+                        <ul class="list-unstyled text-muted small mb-4">
+                            {% for feature in plan.get_features_list %}
+                                <li class="mb-2 d-flex align-items-center gap-2 text-light">
+                                    <i data-lucide="check-circle-2" class="text-success" style="width: 18px; height: 18px;"></i> {{ feature }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="mt-auto">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'initiate_payment' plan.id %}" class="btn {% if plan.is_popular %}btn-primary-custom{% else %}btn-secondary-custom{% endif %} w-100">
+                                    Upgrade to {{ plan.name }}
+                                </a>
+                            {% else %}
+                                <a href="{% url 'register' %}" class="btn btn-primary-custom w-100">
+                                    Get Started
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

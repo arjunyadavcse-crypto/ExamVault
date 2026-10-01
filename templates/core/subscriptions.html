@@ -1,0 +1,65 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Subscriptions & Pricing - ExamVault Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill mb-2">
+            <i data-lucide="shield-check" class="me-1"></i> Flexible Subscription Plans
+        </span>
+        <h2 class="text-white display-5 fw-extrabold">Upgrade Your Learning Journey</h2>
+        <p class="text-muted lead fs-6">Unlock unlimited premium PYQ downloads, full mock test series & AI feedback</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {% for plan in plans %}
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100 position-relative d-flex flex-column justify-content-between {% if plan.is_popular %}border-primary{% endif %}">
+                    {% if plan.is_popular %}
+                        <span class="position-absolute top-0 start-50 translate-middle badge bg-primary px-3 py-2 rounded-pill">
+                            Most Popular Choice
+                        </span>
+                    {% endif %}
+
+                    <div>
+                        <div class="text-center mb-4">
+                            <span class="badge badge-tier {% if plan.tier_code == 'PRO' %}badge-pro{% elif plan.tier_code == 'PREMIUM' %}badge-premium{% else %}badge-free{% endif %} mb-2">
+                                {{ plan.get_tier_code_display }}
+                            </span>
+                            <h3 class="text-white">{{ plan.name }}</h3>
+                            <h1 class="text-primary fw-bold display-5 my-2">₹{{ plan.price }}</h1>
+                            <span class="text-muted small">Validity: {{ plan.duration_days }} Days Access</span>
+                        </div>
+
+                        <ul class="list-unstyled text-muted small mb-4">
+                            {% for feature in plan.get_features_list %}
+                                <li class="mb-3 d-flex align-items-center gap-2 text-light fs-6">
+                                    <i data-lucide="check-circle-2" class="text-success" style="width: 20px; height: 20px;"></i>
+                                    {{ feature }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div>
+                        {% if user.is_authenticated %}
+                            {% if profile.subscription_tier == plan.tier_code %}
+                                <button class="btn btn-success w-100" disabled>Current Active Plan</button>
+                            {% else %}
+                                <a href="{% url 'initiate_payment' plan.id %}" class="btn {% if plan.is_popular %}btn-primary-custom{% else %}btn-secondary-custom{% endif %} w-100">
+                                    Subscribe to {{ plan.name }}
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'register' %}" class="btn btn-primary-custom w-100">
+                                Sign Up to Subscribe
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,332 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Faculty & Staff Admin Portal - ExamVault{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-accent bg-opacity-25 p-3 rounded-circle text-danger">
+                    <i data-lucide="settings" style="width: 36px; height: 36px;"></i>
+                </div>
+                <div>
+                    <h2 class="text-white mb-1">Faculty & Staff Control Panel</h2>
+                    <p class="text-muted small mb-0">Manage Subjects, PYQ PDFs, Tests, Student Attempts & Flask AI Generation</p>
+                </div>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary-custom btn-sm">Student View</a>
+        </div>
+    </div>
+
+    <!-- Quick Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <h3 class="text-white mb-0 fw-bold">{{ subjects.count }}</h3>
+                <span class="text-muted small">Total Subjects</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <h3 class="text-info mb-0 fw-bold">{{ pyqs.count }}</h3>
+                <span class="text-muted small">Uploaded PYQ Papers</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <h3 class="text-primary mb-0 fw-bold">{{ tests.count }}</h3>
+                <span class="text-muted small">Configured Tests</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <h3 class="text-success mb-0 fw-bold">{{ payments.count }}</h3>
+                <span class="text-muted small">Total Payments</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabbed Management Interface -->
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom border-secondary border-opacity-25 pb-3" id="adminTabs">
+        <li class="nav-item">
+            <button class="nav-link active btn-secondary-custom px-4" data-bs-toggle="pill" data-bs-target="#tab-subjects">
+                <i data-lucide="book-open" class="me-1"></i> Subjects
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link btn-secondary-custom px-4" data-bs-toggle="pill" data-bs-target="#tab-pyqs">
+                <i data-lucide="file-up" class="me-1"></i> Upload PYQ PDF
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link btn-secondary-custom px-4" data-bs-toggle="pill" data-bs-target="#tab-tests">
+                <i data-lucide="plus-circle" class="me-1"></i> Create Test
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link btn-secondary-custom px-4" data-bs-toggle="pill" data-bs-target="#tab-ai-gen">
+                <i data-lucide="sparkles" class="me-1 text-warning"></i> AI Test Generator
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link btn-secondary-custom px-4" data-bs-toggle="pill" data-bs-target="#tab-attempts">
+                <i data-lucide="users" class="me-1"></i> Student Attempts
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabsContent">
+        <!-- Subjects Tab -->
+        <div class="tab-pane fade show active" id="tab-subjects">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-3 fs-6">Add New Subject</h5>
+                        <form method="POST" action="{% url 'admin_dashboard' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_subject">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Subject Name</label>
+                                {{ subject_form.name }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Subject Code</label>
+                                {{ subject_form.code }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Icon Name (Lucide)</label>
+                                {{ subject_form.icon }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Description</label>
+                                {{ subject_form.description }}
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">Save Subject</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-3 fs-6">Existing Subjects Directory</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle mb-0" style="--bs-table-bg: transparent;">
+                                <thead>
+                                    <tr class="text-muted small">
+                                        <th>Code</th>
+                                        <th>Subject Name</th>
+                                        <th>PYQs</th>
+                                        <th>Tests</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in subjects %}
+                                        <tr>
+                                            <td><span class="badge bg-secondary">{{ s.code }}</span></td>
+                                            <td class="fw-bold text-white">{{ s.name }}</td>
+                                            <td>{{ s.pyq_count }}</td>
+                                            <td>{{ s.test_count }}</td>
+                                            <td class="text-muted small">{{ s.created_at|date:"M d, Y" }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr><td colspan="5" class="text-center text-muted">No subjects configured.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload PYQs Tab -->
+        <div class="tab-pane fade" id="tab-pyqs">
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-3 fs-6">Upload New PYQ PDF</h5>
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'admin_dashboard' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="upload_pyq">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Subject</label>
+                                {{ pyq_form.subject }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Title</label>
+                                {{ pyq_form.title }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Academic Year</label>
+                                {{ pyq_form.year }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">PDF Document File</label>
+                                {{ pyq_form.pdf_file }}
+                            </div>
+                            <div class="mb-3 form-check">
+                                {{ pyq_form.is_premium }}
+                                <label class="form-check-label text-muted small me-2">Requires Pro / Premium Subscription</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100">Upload PDF Paper</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-3 fs-6">Uploaded PYQs Directory</h5>
+                        <div class="table-responsive">
+                            <table class="table table-dark align-middle mb-0" style="--bs-table-bg: transparent;">
+                                <thead>
+                                    <tr class="text-muted small">
+                                        <th>Title</th>
+                                        <th>Subject</th>
+                                        <th>Year</th>
+                                        <th>Access</th>
+                                        <th>Downloads</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in pyqs %}
+                                        <tr>
+                                            <td class="fw-bold text-white small">{{ p.title }}</td>
+                                            <td class="small">{{ p.subject.name }}</td>
+                                            <td><span class="badge bg-secondary">{{ p.year }}</span></td>
+                                            <td>
+                                                {% if p.is_premium %}
+                                                    <span class="badge badge-premium">PRO</span>
+                                                {% else %}
+                                                    <span class="badge badge-free">FREE</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="small text-muted">{{ p.download_count }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Test Tab -->
+        <div class="tab-pane fade" id="tab-tests">
+            <div class="glass-card p-4 col-md-8 mx-auto">
+                <h5 class="text-white mb-3 fs-6">Create New Test Series</h5>
+                <form method="POST" action="{% url 'admin_dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_test">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Subject</label>
+                            {{ test_form.subject }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small">Test Title</label>
+                            {{ test_form.title }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">Duration (Minutes)</label>
+                            {{ test_form.duration_minutes }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">Pass Percentage (%)</label>
+                            {{ test_form.pass_percentage }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">Difficulty</label>
+                            {{ test_form.difficulty }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small">Description</label>
+                            {{ test_form.description }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary-custom w-100">Create Test Series</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- AI Test Generator Tab -->
+        <div class="tab-pane fade" id="tab-ai-gen">
+            <div class="glass-card p-4 col-md-7 mx-auto text-center">
+                <div class="bg-warning bg-opacity-25 text-warning p-3 rounded-circle d-inline-block mb-3">
+                    <i data-lucide="sparkles" style="width: 40px; height: 40px;"></i>
+                </div>
+                <h4 class="text-white mb-2 brand-font">Batch AI Question & Test Generator</h4>
+                <p class="text-muted small mb-4">Uses Flask Microservice endpoint to automatically generate question bank, options, correct answers and detailed explanations.</p>
+
+                <form method="POST" action="{% url 'admin_dashboard' %}" class="text-start">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="generate_ai_test">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Select Target Subject</label>
+                        <select name="subject" class="form-select" required>
+                            {% for s in subjects %}
+                                <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small">Number of Questions to Generate</label>
+                        <input type="number" name="question_count" class="form-control" value="3" min="1" max="10">
+                    </div>
+
+                    <button type="submit" class="btn btn-accent-custom w-100">
+                        <i data-lucide="cpu" class="me-2"></i> Trigger Flask Microservice AI Generation
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Student Attempts Tab -->
+        <div class="tab-pane fade" id="tab-attempts">
+            <div class="glass-card p-4">
+                <h5 class="text-white mb-3 fs-6">Recent Student Exam Submissions</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark align-middle mb-0" style="--bs-table-bg: transparent;">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Student Username</th>
+                                <th>Test Name</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Result</th>
+                                <th>Date Submitted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for att in attempts %}
+                                <tr>
+                                    <td class="fw-bold text-white">{{ att.student.username }}</td>
+                                    <td>{{ att.test.title }}</td>
+                                    <td>{{ att.score }} / {{ att.total_marks }}</td>
+                                    <td>{{ att.percentage }}%</td>
+                                    <td>
+                                        {% if att.passed %}
+                                            <span class="badge bg-success bg-opacity-25 text-success">PASSED</span>
+                                        {% else %}
+                                            <span class="badge bg-danger bg-opacity-25 text-danger">FAILED</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted small">{{ att.completed_at|date:"M d, Y H:i" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="6" class="text-center text-muted">No student attempts recorded.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

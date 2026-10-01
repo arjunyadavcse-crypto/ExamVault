@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ test.title }} - Instructions | ExamVault{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-card p-4 p-md-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge bg-info bg-opacity-25 text-info border border-info px-3 py-1 rounded-pill">
+                        {{ test.subject.name }}
+                    </span>
+                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-3 py-1 rounded-pill">
+                        {{ test.difficulty }} Difficulty
+                    </span>
+                </div>
+
+                <h2 class="text-white mb-2">{{ test.title }}</h2>
+                <p class="text-muted lead fs-6 mb-4">{{ test.description }}</p>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 glass-card-static rounded-3 text-center">
+                            <i data-lucide="clock" class="text-primary mb-1"></i>
+                            <div class="text-white fw-bold fs-5">{{ test.duration_minutes }} Mins</div>
+                            <div class="text-muted small">Time Limit</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 glass-card-static rounded-3 text-center">
+                            <i data-lucide="help-circle" class="text-info mb-1"></i>
+                            <div class="text-white fw-bold fs-5">{{ test.question_count }}</div>
+                            <div class="text-muted small">Total Questions</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 glass-card-static rounded-3 text-center">
+                            <i data-lucide="award" class="text-warning mb-1"></i>
+                            <div class="text-white fw-bold fs-5">{{ test.total_marks }}</div>
+                            <div class="text-muted small">Total Marks</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 glass-card-static rounded-3 text-center">
+                            <i data-lucide="check-square" class="text-success mb-1"></i>
+                            <div class="text-white fw-bold fs-5">{{ test.pass_percentage }}%</div>
+                            <div class="text-muted small">Passing Criteria</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if previous_attempt %}
+                    <div class="p-3 glass-card-static rounded-3 mb-4 border-info">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-white mb-1">Your Previous Attempt</h6>
+                                <span class="text-muted small">Score: {{ previous_attempt.score }}/{{ previous_attempt.total_marks }} ({{ previous_attempt.percentage }}%)</span>
+                            </div>
+                            <a href="{% url 'test_result' previous_attempt.id %}" class="btn btn-outline-info btn-sm">
+                                View Previous Answer Key
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="p-4 rounded-3 mb-4" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border);">
+                    <h5 class="text-white mb-3"><i data-lucide="alert-circle" class="me-2 text-warning"></i> Examination Rules & Instructions</h5>
+                    <ul class="text-muted small mb-0 lh-lg">
+                        <li>Each question carries equal marks as indicated. No negative marking for wrong answers.</li>
+                        <li>The timer will start immediately when you click <strong>"Begin Exam Attempt"</strong>.</li>
+                        <li>You can navigate back and forth between questions using the Question Navigator Palette.</li>
+                        <li>Do not refresh or close the tab while attempting the exam, or your answers will be automatically submitted.</li>
+                        <li>Once submitted, Flask AI Service will analyze your attempt performance and generate step-by-step solutions.</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="{% url 'take_test' test.id %}" class="btn btn-primary-custom btn-lg flex-grow-1">
+                        <i data-lucide="play-circle" class="me-2"></i> Begin Exam Attempt Now
+                    </a>
+                    <a href="{% url 'tests' %}" class="btn btn-secondary-custom btn-lg">Back to Tests</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

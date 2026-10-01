@@ -1,0 +1,128 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Test Result: {{ attempt.test.title }} | ExamVault{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Result Header Card -->
+    <div class="glass-card p-4 p-md-5 mb-4 text-center">
+        <div class="mb-3">
+            {% if attempt.passed %}
+                <div class="bg-success bg-opacity-25 text-success p-3 rounded-circle d-inline-block border border-success">
+                    <i data-lucide="check-circle" style="width: 56px; height: 56px;"></i>
+                </div>
+                <h2 class="text-white mt-3 mb-1">Congratulations! Test Passed 🎉</h2>
+                <p class="text-muted">You achieved the qualifying cutoff percentage for {{ attempt.test.title }}.</p>
+            {% else %}
+                <div class="bg-danger bg-opacity-25 text-danger p-3 rounded-circle d-inline-block border border-danger">
+                    <i data-lucide="alert-triangle" style="width: 56px; height: 56px;"></i>
+                </div>
+                <h2 class="text-white mt-3 mb-1">Test Attempt Completed</h2>
+                <p class="text-muted">Review the detailed step-by-step solutions below to prepare better.</p>
+            {% endif %}
+        </div>
+
+        <!-- Score Breakdown Badges -->
+        <div class="row g-3 justify-content-center my-4">
+            <div class="col-6 col-md-3">
+                <div class="p-3 glass-card-static rounded-3">
+                    <div class="text-muted small mb-1">Your Score</div>
+                    <h3 class="text-white fw-bold mb-0">{{ attempt.score }} / {{ attempt.total_marks }}</h3>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 glass-card-static rounded-3">
+                    <div class="text-muted small mb-1">Percentage</div>
+                    <h3 class="{% if attempt.passed %}text-success{% else %}text-warning{% endif %} fw-bold mb-0">
+                        {{ attempt.percentage }}%
+                    </h3>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 glass-card-static rounded-3">
+                    <div class="text-muted small mb-1">Correct Answers</div>
+                    <h3 class="text-success fw-bold mb-0">{{ correct_count }}</h3>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 glass-card-static rounded-3">
+                    <div class="text-muted small mb-1">Wrong / Skipped</div>
+                    <h3 class="text-danger fw-bold mb-0">{{ wrong_count }} / {{ skipped_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'test_detail' attempt.test.id %}" class="btn btn-primary-custom">Re-Attempt Test</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary-custom">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- AI Performance Insights Card -->
+    {% if attempt.ai_feedback %}
+        <div class="glass-card p-4 mb-4 border-primary">
+            <div class="d-flex align-items-start gap-3">
+                <div class="bg-primary bg-opacity-25 text-primary p-3 rounded-circle flex-shrink-0">
+                    <i data-lucide="sparkles" style="width: 32px; height: 32px;"></i>
+                </div>
+                <div>
+                    <h5 class="text-white brand-font mb-2">Flask AI Performance Analysis & Recommendation</h5>
+                    <p class="text-light mb-0 fs-6">{{ attempt.ai_feedback }}</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Answer Key & Detailed Solution Explanations -->
+    <div class="glass-card p-4">
+        <h4 class="text-white mb-4 fs-5"><i data-lucide="file-check" class="me-2 text-primary"></i> Step-by-Step Answer Key & Explanations</h4>
+
+        <div class="d-flex flex-column gap-4">
+            {% for ans in answers %}
+                <div class="p-4 glass-card-static rounded-3 {% if ans.is_correct %}border-success{% elif ans.selected_option %}border-danger{% else %}border-secondary{% endif %}" style="border: 1px solid;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-secondary text-light">Question {{ forloop.counter }}</span>
+                        {% if ans.is_correct %}
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-1">+{{ ans.marks_obtained }} Marks (Correct)</span>
+                        {% elif ans.selected_option %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-1">0 Marks (Incorrect)</span>
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-3 py-1">Skipped</span>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="text-white mb-3 fs-6">{{ ans.question.question_text }}</h5>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <div class="p-2 rounded {% if ans.question.correct_option == 'A' %}bg-success bg-opacity-25 border border-success text-success{% elif ans.selected_option == 'A' %}bg-danger bg-opacity-25 border border-danger text-danger{% else %}bg-dark text-muted{% endif %}">
+                                <strong>A:</strong> {{ ans.question.option_a }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 rounded {% if ans.question.correct_option == 'B' %}bg-success bg-opacity-25 border border-success text-success{% elif ans.selected_option == 'B' %}bg-danger bg-opacity-25 border border-danger text-danger{% else %}bg-dark text-muted{% endif %}">
+                                <strong>B:</strong> {{ ans.question.option_b }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 rounded {% if ans.question.correct_option == 'C' %}bg-success bg-opacity-25 border border-success text-success{% elif ans.selected_option == 'C' %}bg-danger bg-opacity-25 border border-danger text-danger{% else %}bg-dark text-muted{% endif %}">
+                                <strong>C:</strong> {{ ans.question.option_c }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 rounded {% if ans.question.correct_option == 'D' %}bg-success bg-opacity-25 border border-success text-success{% elif ans.selected_option == 'D' %}bg-danger bg-opacity-25 border border-danger text-danger{% else %}bg-dark text-muted{% endif %}">
+                                <strong>D:</strong> {{ ans.question.option_d }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 text-light small">
+                        <strong class="text-info"><i data-lucide="info" class="me-1"></i> Solution Explanation:</strong>
+                        <p class="mb-0 mt-1 text-muted">{{ ans.question.explanation|default:"Comprehensive concept explanation included for student review." }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

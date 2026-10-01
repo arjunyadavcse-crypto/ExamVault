@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Checkout - Razorpay Payment Gateway | ExamVault{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="glass-card p-4 p-md-5 text-center">
+                <div class="mb-4">
+                    <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay Logo" width="48" class="mb-3">
+                    <h3 class="text-white">Secure Razorpay Checkout</h3>
+                    <p class="text-muted small">Complete payment to upgrade your subscription</p>
+                </div>
+
+                <div class="p-3 glass-card-static rounded-3 mb-4 text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subscription Plan:</span>
+                        <strong class="text-white">{{ plan.name }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Order ID:</span>
+                        <span class="badge bg-secondary text-light">{{ order_id }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Validity:</span>
+                        <span class="text-white">{{ plan.duration_days }} Days</span>
+                    </div>
+                    <hr class="border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between fs-5 fw-bold">
+                        <span class="text-white">Total Amount:</span>
+                        <span class="text-primary">₹{{ payment.amount }}</span>
+                    </div>
+                </div>
+
+                <form id="razorpayVerifyForm" method="POST" action="{% url 'verify_payment' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="razorpay_order_id" value="{{ order_id }}">
+                    <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id" value="">
+                    <input type="hidden" name="razorpay_signature" id="rzp_signature" value="">
+
+                    <button type="button" id="rzp-button1" class="btn btn-primary-custom btn-lg w-100 mb-3">
+                        <i data-lucide="credit-card" class="me-2"></i> Pay ₹{{ payment.amount }} via Razorpay
+                    </button>
+                </form>
+
+                <div class="alert alert-info small mb-0 glass-card-static text-info border-info text-start">
+                    <i data-lucide="shield-check" class="me-1"></i> Simulated Razorpay sandbox environment. Clicking the button initiates seamless payment verification and instant tier upgrade.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('rzp-button1').onclick = function(e){
+        // Simulate Razorpay payment completion for demonstration/test mode
+        let simPaymentId = "pay_" + Math.random().toString(36).substring(2, 12);
+        let simSignature = "sig_" + Math.random().toString(36).substring(2, 16);
+        
+        document.getElementById('rzp_payment_id').value = simPaymentId;
+        document.getElementById('rzp_signature').value = simSignature;
+        
+        alert("Razorpay Payment Gateway Modal Triggered!\n\nOrder ID: {{ order_id }}\nAmount: ₹{{ payment.amount }}\nStatus: Authorized");
+        document.getElementById('razorpayVerifyForm').submit();
+    }
+</script>
+{% endblock %}

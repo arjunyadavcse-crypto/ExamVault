@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ExamVault - PYQ & Test Series Platform{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i data-lucide="shield-check" class="text-primary me-1"></i> ExamVault
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                            <i data-lucide="home" class="me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'subjects' %}active{% endif %}" href="{% url 'subjects' %}">
+                            <i data-lucide="book-open" class="me-1"></i> Subjects
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'pyqs' %}active{% endif %}" href="{% url 'pyqs' %}">
+                            <i data-lucide="file-text" class="me-1"></i> PYQs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'tests' %}active{% endif %}" href="{% url 'tests' %}">
+                            <i data-lucide="award" class="me-1"></i> Test Series
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'subscriptions' %}active{% endif %}" href="{% url 'subscriptions' %}">
+                            <i data-lucide="zap" class="me-1"></i> Pricing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'ai_assistant' %}active{% endif %}" href="{% url 'ai_assistant' %}">
+                            <i data-lucide="sparkles" class="me-1 text-warning"></i> AI Lab
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary-custom btn-sm">
+                            <i data-lucide="user" class="me-1"></i> Dashboard
+                        </a>
+                        {% if user.profile.role == 'ADMIN' or user.is_staff %}
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-accent-custom btn-sm">
+                                <i data-lucide="settings" class="me-1"></i> Admin Portal
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm rounded-3">
+                            <i data-lucide="log-out"></i>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-secondary-custom btn-sm me-1">Log In</a>
+                        <a href="{% url 'register' %}" class="btn btn-primary-custom btn-sm">Get Started</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show glass-card-static border-0 text-white" role="alert">
+                    <i data-lucide="info" class="me-2"></i> {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content Container -->
+    <main class="flex-grow-1 py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center text-md-start">
+            <div class="row gy-4">
+                <div class="col-md-5">
+                    <h5 class="text-white brand-font"><i data-lucide="shield-check" class="text-primary me-1"></i> ExamVault Platform</h5>
+                    <p class="small text-muted mt-2">
+                        Next-Generation PYQ Repository & AI-Powered Test Series Platform built for students and faculty. Django Backend + SQLite + Flask Microservice.
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="text-white font-weight-bold">Quick Links</h6>
+                    <ul class="list-unstyled small mt-2">
+                        <li><a href="{% url 'pyqs' %}" class="text-muted text-decoration-none">Previous Year Question PDFs</a></li>
+                        <li><a href="{% url 'tests' %}" class="text-muted text-decoration-none">Online MCQ Mock Tests</a></li>
+                        <li><a href="{% url 'subscriptions' %}" class="text-muted text-decoration-none">Subscription Plans</a></li>
+                        <li><a href="{% url 'ai_assistant' %}" class="text-muted text-decoration-none">AI Question Generator</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <h6 class="text-white">Architecture Info</h6>
+                    <p class="small text-muted mt-2">
+                        Django ORM & SQLite Database | Razorpay Integration Ready | Flask Microservice (AI Insights)
+                    </p>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 rounded-pill small">
+                        ● All Systems Operational
+                    </span>
+                </div>
+            </div>
+            <hr class="my-4 border-secondary opacity-25">
+            <div class="text-center small text-muted">
+                © 2026 ExamVault Academic Solutions. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
